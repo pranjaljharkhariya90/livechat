@@ -3,58 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P Global Chat</title>
+    <title>Permanent P2P Chat</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            background-size: 400% 400%;
-            animation: gradient 15s ease infinite;
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             height: 100vh; display: flex; justify-content: center; align-items: center;
             font-family: 'Segoe UI', sans-serif; color: white;
         }
-        @keyframes gradient { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
         
         #chat-card {
-            width: 90%; max-width: 800px; height: 80vh;
-            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(20px);
-            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 95%; max-width: 800px; height: 85vh;
+            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
+            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
             display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
-        #header { padding: 20px; background: rgba(0,0,0,0.3); text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #header { padding: 15px 25px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.1); }
         #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
         
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 70%; font-size: 14px; }
-        .sent { background: #00d2ff; color: #000; align-self: flex-end; }
-        .received { background: rgba(255,255,255,0.2); align-self: flex-start; }
+        /* Chat Bubbles */
+        .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; position: relative; font-size: 15px; }
+        .sent { background: #0084ff; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .received { background: rgba(255,255,255,0.1); align-self: flex-start; border-bottom-left-radius: 2px; }
         
-        #status-bar { padding: 10px 20px; font-size: 12px; background: rgba(0,0,0,0.2); color: #2ecc71; }
+        .time { font-size: 10px; opacity: 0.6; display: block; margin-top: 5px; text-align: right; }
 
-        #controls { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.4); }
+        #input-row { padding: 15px; background: rgba(0,0,0,0.4); display: flex; gap: 10px; }
         input { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; color: white; outline: none; }
-        button { background: #2ecc71; border: none; padding: 0 20px; border-radius: 10px; color: black; font-weight: bold; cursor: pointer; }
+        button { padding: 10px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .btn-connect { background: #2ecc71; color: #000; }
+        .btn-send { background: #00d2ff; color: #000; }
     </style>
 </head>
 <body>
 
 <div id="chat-card">
     <div id="header">
-        <h2>P2P Crystal Chat</h2>
-        <p id="my-id-display">Generating ID...</p>
-    </div>
-    <div id="status-bar">Status: Waiting for connection...</div>
-    <div id="messages"></div>
-    
-    <div id="controls">
-        <input type="text" id="target-id" placeholder="Paste Friend's ID here...">
-        <button id="connect-btn">Connect</button>
+        <h3 id="title">Crystal Chat</h3>
+        <p id="my-id-display" style="font-size: 12px; color: #00d2ff; cursor: pointer;">Assigning Permanent ID...</p>
     </div>
 
-    <div id="controls">
+    <div id="messages"></div>
+    
+    <div id="input-row">
+        <input type="text" id="target-id" placeholder="Friend's Permanent ID...">
+        <button class="btn-connect" id="connect-btn">Link</button>
+    </div>
+
+    <div id="input-row" style="background: rgba(0,0,0,0.6);">
         <input type="text" id="msg-input" placeholder="Type a message...">
-        <button id="send-btn">Send</button>
+        <button class="btn-send" id="send-btn">Send</button>
     </div>
 </div>
 
@@ -64,67 +65,77 @@
     const sendBtn = document.getElementById('send-btn');
     const connectBtn = document.getElementById('connect-btn');
     const targetIdInput = document.getElementById('target-id');
-    const statusDiv = document.getElementById('status-bar');
     const myIdDisplay = document.getElementById('my-id-display');
 
-    // Initialize Peer
-    const peer = new Peer(); 
+    // --- 1. HANDLE PERMANENT ID ---
+    // Look for a saved ID, if not, create a random string
+    let savedID = localStorage.getItem('my_p2p_id');
+    if (!savedID) {
+        savedID = 'user-' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('my_p2p_id', savedID);
+    }
+
+    // Initialize Peer with the FIXED ID
+    const peer = new Peer(savedID); 
     let conn;
 
-    // Show your ID so you can send it to your friend
-    peer.on('open', (id) => {
-        myIdDisplay.innerText = "Your ID: " + id;
-    });
+    // --- 2. LOAD CHAT HISTORY ---
+    window.onload = () => {
+        const history = JSON.parse(localStorage.getItem('chat_history')) || [];
+        history.forEach(m => renderMessage(m.user, m.text, m.type, m.time));
+        myIdDisplay.innerText = "Your Permanent ID: " + savedID + " (Click to copy)";
+    };
 
-    // Handle incoming connections
+    myIdDisplay.onclick = () => {
+        navigator.clipboard.writeText(savedID);
+        alert("ID Copied! Share this with your friend.");
+    };
+
+    // Handling connections
     peer.on('connection', (connection) => {
         conn = connection;
         setupChat();
     });
 
-    // Handle clicking "Connect" to a friend
     connectBtn.onclick = () => {
-        const friendId = targetIdInput.value;
-        if (friendId) {
-            conn = peer.connect(friendId);
-            setupChat();
-        }
+        conn = peer.connect(targetIdInput.value);
+        setupChat();
     };
 
     function setupChat() {
-        conn.on('open', () => {
-            statusDiv.innerText = "Status: Online - Connected to peer!";
-            statusDiv.style.color = "#2ecc71";
-            addMessage("System", "You are now connected!", "received");
-        });
-
         conn.on('data', (data) => {
-            addMessage("Friend", data, "received");
-        });
-
-        conn.on('close', () => {
-            statusDiv.innerText = "Status: Peer went Offline";
-            statusDiv.style.color = "#e74c3c";
+            saveAndRender("Friend", data.text, "received", data.time);
         });
     }
 
-    sendBtn.onclick = () => {
-        const msg = msgInput.value;
-        if (msg && conn) {
-            conn.send(msg);
-            addMessage("You", msg, "sent");
+    function sendMessage() {
+        const text = msgInput.value;
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (text && conn) {
+            conn.send({ text, time });
+            saveAndRender("You", text, "sent", time);
             msgInput.value = '';
         }
-    };
+    }
 
-    function addMessage(user, text, type) {
+    sendBtn.onclick = sendMessage;
+    msgInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+
+    // --- 3. STORAGE LOGIC ---
+    function saveAndRender(user, text, type, time) {
+        const history = JSON.parse(localStorage.getItem('chat_history')) || [];
+        history.push({ user, text, type, time });
+        localStorage.setItem('chat_history', JSON.stringify(history));
+        renderMessage(user, text, type, time);
+    }
+
+    function renderMessage(user, text, type, time) {
         const div = document.createElement('div');
         div.className = `msg ${type}`;
-        div.innerHTML = `<strong>${user}:</strong> ${text}`;
+        div.innerHTML = `<strong>${user}</strong><br>${text}<span class="time">${time}</span>`;
         messagesDiv.appendChild(div);
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 </script>
-
 </body>
 </html>
