@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Crystal Chat + Emojis</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1/index.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e);
+            background-size: 400% 400%;
+            animation: gradient 10s ease infinite;
+            height: 100vh;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Segoe UI', sans-serif;
+            color: white;
+        }
+
+        @keyframes gradient { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
+
+        #chat-card {
+            width: 95%; max-width: 1000px; height: 85vh;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border-radius: 30px;
+            display: flex; border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+        }
+
+        #sidebar { width: 280px; background: rgba(0, 0, 0, 0.3); padding: 25px; border-right: 1px solid rgba(255,255,255,0.1); }
+
+        #chat-main { flex: 1; display: flex; flex-direction: column; position: relative; }
+
+        #messages { flex: 1; padding: 25px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; }
+
+        /* Typing Indicator Styling */
+        #typing-status {
+            padding: 5px 25px;
+            font-size: 13px;
+            font-style: italic;
+            color: #2ecc71;
+            height: 25px;
+        }
+
+        .msg { max-width: 70%; padding: 12px 18px; border-radius: 20px; font-size: 15px; }
+        .msg.received { background: rgba(255, 255, 255, 0.15); align-self: flex-start; border-bottom-left-radius: 2px; }
+        .msg.sent { background: #00d2ff; color: #000; font-weight: 500; align-self: flex-end; border-bottom-right-radius: 2px; }
+
+        #input-box { padding: 20px; background: rgba(0, 0, 0, 0.4); display: flex; gap: 10px; align-items: center; }
+
+        input {
+            flex: 1; background: rgba(255, 255, 255, 0.1); border: none;
+            padding: 15px; border-radius: 15px; color: white; outline: none;
+        }
+
+        .icon-btn { background: none; border: none; font-size: 24px; cursor: pointer; transition: 0.2s; }
+        .icon-btn:hover { transform: scale(1.2); }
+
+        /* Emoji Picker Floating Menu */
+        emoji-picker {
+            position: absolute; bottom: 85px; right: 20px;
+            display: none; height: 350px;
+            --border-radius: 20px;
+        }
+        emoji-picker.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="chat-card">
+        <div id="sidebar">
+            <h2 style="margin-bottom: 20px; letter-spacing: 1px;">Global Hub</h2>
+            <div id="user-list">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="height:10px; width:10px; background:#2ecc71; border-radius:50%; box-shadow: 0 0 10px #2ecc71;"></span>
+                    <span>You (Online)</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-main">
+            <div id="messages"></div>
+            <div id="typing-status"></div>
+            
+            <emoji-picker id="picker"></emoji-picker>
+
+            <div id="input-box">
+                <button class="icon-btn" id="emoji-btn">😊</button>
+                <input type="text" id="message-input" placeholder="Write a message...">
+                <button id="send-btn" style="background:#00d2ff; color:black; border:none; padding: 12px 25px; border-radius:15px; font-weight:bold; cursor:pointer;">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('https://socket-io-chat.now.sh');
+        const msgInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const messagesDiv = document.getElementById('messages');
+        const typingStatus = document.getElementById('typing-status');
+        const emojiBtn = document.getElementById('emoji-btn');
+        const picker = document.getElementById('picker');
+
+        const username = prompt("What's your name?") || "Stranger";
+
+        // --- EMOJI LOGIC ---
+        emojiBtn.onclick = () => picker.classList.toggle('active');
+        picker.addEventListener('emoji-click', event => {
+            msgInput.value += event.detail.unicode;
+            picker.classList.remove('active');
+            msgInput.focus();
+        });
+
+        // --- TYPING LOGIC ---
+        let typingTimeout;
+        msgInput.addEventListener('keypress', () => {
+            socket.emit('typing'); // Tell server I'm typing
+        });
+
+        socket.on('typing', (data) => {
+            typingStatus.innerText = `${data.username} is typing...`;
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                typingStatus.innerText = '';
+            }, 2000); // Hide after 2 seconds of no typing
+        });
+
+        // --- MESSAGE LOGIC ---
+        function addMessage(user, text, type) {
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            div.innerHTML = `<strong>${user}:</strong> <br> ${text}`;
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        sendBtn.onclick = () => {
+            const msg = msgInput.value;
+            if (msg) {
+                socket.emit('new message', msg);
+                addMessage('You', msg, 'sent');
+                msgInput.value = '';
+                socket.emit('stop typing');
+            }
+        };
+
+        socket.on('new message', (data) => {
+            if (data.username !== username) {
+                addMessage(data.username, data.message, 'received');
+            }
+        });
+
+        msgInput.addEventListener("keypress", (e) => { if (e.key === "Enter") sendBtn.click(); });
+    </script>
+</body>
+</html>
