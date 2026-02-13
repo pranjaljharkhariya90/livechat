@@ -3,139 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Permanent P2P Chat</title>
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <title>Happy Valentine's Day, My Love! 💖</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&display=swap');
         body {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            height: 100vh; display: flex; justify-content: center; align-items: center;
-            font-family: 'Segoe UI', sans-serif; color: white;
+            margin: 0;
+            padding: 0;
+            font-family: 'Dancing Script', cursive;
+            background: linear-gradient(135deg, #ff1744, #d50000, #ff4081);
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+            text-align: center;
+            position: relative;
         }
-        
-        #chat-card {
-            width: 95%; max-width: 800px; height: 85vh;
-            background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(20px);
-            border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; flex-direction: column; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        #hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
-
-        #header { padding: 15px 25px; background: rgba(0,0,0,0.3); border-bottom: 1px solid rgba(255,255,255,0.1); }
-        #messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
-        /* Chat Bubbles */
-        .msg { padding: 10px 15px; border-radius: 15px; max-width: 75%; position: relative; font-size: 15px; }
-        .sent { background: #0084ff; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .received { background: rgba(255,255,255,0.1); align-self: flex-start; border-bottom-left-radius: 2px; }
-        
-        .time { font-size: 10px; opacity: 0.6; display: block; margin-top: 5px; text-align: right; }
-
-        #input-row { padding: 15px; background: rgba(0,0,0,0.4); display: flex; gap: 10px; }
-        input { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 12px; border-radius: 10px; color: white; outline: none; }
-        button { padding: 10px 20px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-connect { background: #2ecc71; color: #000; }
-        .btn-send { background: #00d2ff; color: #000; }
+        .heart {
+            position: absolute;
+            font-size: 2rem;
+            color: #ffcdd2;
+            animation: float 6s infinite linear;
+        }
+        @keyframes float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+        .page {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            z-index: 2;
+            animation: fadeIn 1s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .page.active { display: block; }
+        h1 { font-size: 3.5rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        p { font-size: 1.5rem; margin: 20px 0; }
+        button {
+            background: #ff4081;
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        button:hover {
+            transform: scale(1.1);
+            background: #ff1744;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        #music { display: none; } /* Hidden audio player */
     </style>
 </head>
 <body>
-
-<div id="chat-card">
-    <div id="header">
-        <h3 id="title">Crystal Chat</h3>
-        <p id="my-id-display" style="font-size: 12px; color: #00d2ff; cursor: pointer;">Assigning Permanent ID...</p>
-    </div>
-
-    <div id="messages"></div>
+    <div id="hearts"></div>
     
-    <div id="input-row">
-        <input type="text" id="target-id" placeholder="Friend's Permanent ID...">
-        <button class="btn-connect" id="connect-btn">Link</button>
+    <!-- Background Music: Replace src with your own MP3 if desired. This is a placeholder for free romantic track. -->
+    <audio id="music" loop autoplay>
+        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/mpeg"> <!-- Replace with free romantic MP3 URL, e.g., from Chosic or Bensound -->
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Page 1: Welcome -->
+    <div id="page1" class="page active">
+        <h1>Happy Valentine's Day! 💕</h1>
+        <p>My dearest [Her Name], you make my world brighter every day.</p>
+        <p>Click to see how much I love you... ❤️</p>
+        <button onclick="nextPage(2)">Enter My Heart</button>
     </div>
 
-    <div id="input-row" style="background: rgba(0,0,0,0.6);">
-        <input type="text" id="msg-input" placeholder="Type a message...">
-        <button class="btn-send" id="send-btn">Send</button>
+    <!-- Page 2: Sweet Message -->
+    <div id="page2" class="page">
+        <h1>I Love You More Each Day 🌹</h1>
+        <p>Your smile is my favorite thing. You're my everything, my love.</p>
+        <p>Together, we create the best memories. Can't wait for more! 💖</p>
+        <button onclick="prevPage(1)">Back</button>
+        <button onclick="nextPage(3)" style="margin-left: 20px;">Next</button>
     </div>
-</div>
 
-<script>
-    const messagesDiv = document.getElementById('messages');
-    const msgInput = document.getElementById('msg-input');
-    const sendBtn = document.getElementById('send-btn');
-    const connectBtn = document.getElementById('connect-btn');
-    const targetIdInput = document.getElementById('target-id');
-    const myIdDisplay = document.getElementById('my-id-display');
+    <!-- Page 3: Forever -->
+    <div id="page3" class="page">
+        <h1>Forever Yours 💍</h1>
+        <p>You're the beat in my heart, the dream in my sleep.</p>
+        <p>Happy Valentine's, my soulmate. Love always, [Your Name] 😘</p>
+        <button onclick="prevPage(2)">Back</button>
+        <button onclick="location.reload()">Replay Magic</button>
+    </div>
 
-    // --- 1. HANDLE PERMANENT ID ---
-    // Look for a saved ID, if not, create a random string
-    let savedID = localStorage.getItem('my_p2p_id');
-    if (!savedID) {
-        savedID = 'user-' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('my_p2p_id', savedID);
-    }
-
-    // Initialize Peer with the FIXED ID
-    const peer = new Peer(savedID); 
-    let conn;
-
-    // --- 2. LOAD CHAT HISTORY ---
-    window.onload = () => {
-        const history = JSON.parse(localStorage.getItem('chat_history')) || [];
-        history.forEach(m => renderMessage(m.user, m.text, m.type, m.time));
-        myIdDisplay.innerText = "Your Permanent ID: " + savedID + " (Click to copy)";
-    };
-
-    myIdDisplay.onclick = () => {
-        navigator.clipboard.writeText(savedID);
-        alert("ID Copied! Share this with your friend.");
-    };
-
-    // Handling connections
-    peer.on('connection', (connection) => {
-        conn = connection;
-        setupChat();
-    });
-
-    connectBtn.onclick = () => {
-        conn = peer.connect(targetIdInput.value);
-        setupChat();
-    };
-
-    function setupChat() {
-        conn.on('data', (data) => {
-            saveAndRender("Friend", data.text, "received", data.time);
-        });
-    }
-
-    function sendMessage() {
-        const text = msgInput.value;
-        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        if (text && conn) {
-            conn.send({ text, time });
-            saveAndRender("You", text, "sent", time);
-            msgInput.value = '';
+    <script>
+        // Create floating hearts
+        function createHearts() {
+            const hearts = document.getElementById('hearts');
+            for (let i = 0; i < 20; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.innerHTML = '💖';
+                heart.style.left = Math.random() * 100 + '%';
+                heart.style.animationDelay = Math.random() * 6 + 's';
+                hearts.appendChild(heart);
+            }
         }
-    }
+        createHearts();
 
-    sendBtn.onclick = sendMessage;
-    msgInput.onkeypress = (e) => { if(e.key === 'Enter') sendMessage(); };
+        // Page navigation
+        function nextPage(pageNum) {
+            hideAllPages();
+            document.getElementById('page' + pageNum).classList.add('active');
+        }
+        function prevPage(pageNum) {
+            hideAllPages();
+            document.getElementById('page' + pageNum).classList.add('active');
+        }
+        function hideAllPages() {
+            const pages = document.querySelectorAll('.page');
+            pages.forEach(p => p.classList.remove('active'));
+        }
 
-    // --- 3. STORAGE LOGIC ---
-    function saveAndRender(user, text, type, time) {
-        const history = JSON.parse(localStorage.getItem('chat_history')) || [];
-        history.push({ user, text, type, time });
-        localStorage.setItem('chat_history', JSON.stringify(history));
-        renderMessage(user, text, type, time);
-    }
-
-    function renderMessage(user, text, type, time) {
-        const div = document.createElement('div');
-        div.className = `msg ${type}`;
-        div.innerHTML = `<strong>${user}</strong><br>${text}<span class="time">${time}</span>`;
-        messagesDiv.appendChild(div);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
-</script>
+        // Unmute music on user interaction (browser policy)
+        document.addEventListener('click', () => {
+            const music = document.getElementById('music');
+            music.play().catch(() => {});
+        }, { once: true });
+    </script>
 </body>
 </html>
+
