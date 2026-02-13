@@ -53,7 +53,20 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .page.active { display: block; }
-        h1 { font-size: 3.5rem; margin: 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        .gf-pic {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 20px auto;
+            box-shadow: 0 8px 25px rgba(255,255,255,0.3);
+            transition: all 0.3s;
+        }
+        .gf-pic:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 35px rgba(255,255,255,0.5);
+        }
+        h1 { font-size: 3.5rem; margin: 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         p { font-size: 1.5rem; margin: 20px 0; }
         button {
             background: #ff4081;
@@ -66,26 +79,28 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: all 0.3s;
             font-family: inherit;
+            margin: 10px;
         }
         button:hover {
             transform: scale(1.1);
             background: #ff1744;
             box-shadow: 0 6px 20px rgba(0,0,0,0.4);
         }
-        #music { display: none; } /* Hidden audio player */
+        #music { display: none; }
     </style>
 </head>
 <body>
     <div id="hearts"></div>
     
-    <!-- Background Music: Replace src with your own MP3 if desired. This is a placeholder for free romantic track. -->
-    <audio id="music" loop autoplay>
-        <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/mpeg"> <!-- Replace with free romantic MP3 URL, e.g., from Chosic or Bensound -->
-        Your browser does not support the audio element.
+    <!-- Romantic Background Music: Free Valentine's piano by Alex-Productions (Chosic) -->
+    <audio id="music" loop autoplay muted>
+        <source src="https://www.chosic.com/wp-content/uploads/2023/05/Valentines-Day.mp3" type="audio/mpeg">
+        Your browser does not support the audio element. Romantic Valentine's music!
     </audio>
 
     <!-- Page 1: Welcome -->
     <div id="page1" class="page active">
+        <img src="gf.jpg" alt="My Beautiful Love 💕" class="gf-pic">
         <h1>Happy Valentine's Day! 💕</h1>
         <p>My dearest [Her Name], you make my world brighter every day.</p>
         <p>Click to see how much I love you... ❤️</p>
@@ -94,15 +109,17 @@
 
     <!-- Page 2: Sweet Message -->
     <div id="page2" class="page">
+        <img src="gf.jpg" alt="My Beautiful Love 💕" class="gf-pic">
         <h1>I Love You More Each Day 🌹</h1>
         <p>Your smile is my favorite thing. You're my everything, my love.</p>
         <p>Together, we create the best memories. Can't wait for more! 💖</p>
         <button onclick="prevPage(1)">Back</button>
-        <button onclick="nextPage(3)" style="margin-left: 20px;">Next</button>
+        <button onclick="nextPage(3)">Next</button>
     </div>
 
     <!-- Page 3: Forever -->
     <div id="page3" class="page">
+        <img src="gf.jpg" alt="My Beautiful Love 💕" class="gf-pic">
         <h1>Forever Yours 💍</h1>
         <p>You're the beat in my heart, the dream in my sleep.</p>
         <p>Happy Valentine's, my soulmate. Love always, [Your Name] 😘</p>
@@ -139,12 +156,12 @@
             pages.forEach(p => p.classList.remove('active'));
         }
 
-        // Unmute music on user interaction (browser policy)
+        // Unmute music on first user interaction (browser policy)
         document.addEventListener('click', () => {
             const music = document.getElementById('music');
             music.play().catch(() => {});
+            music.muted = false;
         }, { once: true });
     </script>
 </body>
 </html>
-
