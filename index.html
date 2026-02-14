@@ -3,225 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pranjal 💕 Nayla</title>
+    <title>Pop My Heart!</title>
     <style>
         :root {
-            --bg-color: #fce4ec;
-            --accent-color: #d81b60;
-            --card-bg: rgba(255, 255, 255, 0.9);
+            --primary-red: #ff4d6d;
+            --soft-pink: #fff0f3;
+            --gold: #ffb703;
         }
 
         body {
-            margin: 0;
-            padding: 20px;
+            background-color: var(--soft-pink);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            background-image: url('https://www.transparenttextures.com/patterns/hearts-tile.png');
-            text-align: center;
-            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
             overflow-x: hidden;
         }
 
-        header { margin-bottom: 20px; position: relative; }
-        
         h1 {
-            font-size: 2.2rem;
-            color: var(--accent-color);
-            margin-bottom: 5px;
+            color: var(--primary-red);
+            margin-top: 20px;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        #counter { font-size: 1rem; font-weight: bold; margin-bottom: 10px; }
-
-        /* Music Controls */
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            padding: 50px;
+            width: 90%;
+            max-width: 1200px;
         }
 
-        .btn-music {
-            background: white;
-            border: 2px solid var(--accent-color);
-            border-radius: 50%;
-            width: 45px;
-            height: 45px;
-            cursor: pointer;
+        /* Balloon Styling */
+        .balloon-wrapper {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            transition: 0.3s;
-        }
-
-        /* Balloon Section */
-        .balloon-container {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin: 20px auto 40px;
-            max-width: 500px;
+            position: relative;
+            cursor: pointer;
         }
 
         .balloon {
-            width: 35px;
-            height: 45px;
-            background-color: var(--accent-color);
-            border-radius: 50%;
-            cursor: pointer;
+            width: 100px;
+            height: 120px;
+            background-color: var(--primary-red);
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
             position: relative;
             animation: float 3s ease-in-out infinite;
-            box-shadow: inset -5px -5px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            box-shadow: inset -10px -10px 15px rgba(0,0,0,0.1);
         }
 
         .balloon::after {
-            content: "";
+            content: "♥";
             position: absolute;
-            bottom: -8px;
-            left: 16px;
+            bottom: -15px;
+            left: 42px;
+            color: var(--primary-red);
+            font-size: 20px;
+        }
+
+        .string {
             width: 2px;
-            height: 12px;
-            background: rgba(0,0,0,0.2);
+            height: 80px;
+            background: rgba(0,0,0,0.1);
+            margin-top: 10px;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(-2deg); }
-            50% { transform: translateY(-12px) rotate(2deg); }
-        }
-
-        .popped { visibility: hidden; pointer-events: none; }
-
-        /* Grid Section */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
+        /* Message Card Styling */
         .card {
-            background: var(--card-bg);
-            border: 1px solid #ffc1e3;
-            border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
             display: none;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .card h3 {
-            font-family: 'Brush Script MT', cursive;
-            font-size: 1.8rem;
-            color: var(--accent-color);
-            margin: 10px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 180px;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .card img {
             width: 100%;
-            height: 280px;
-            object-fit: cover;
-            border-radius: 12px;
+            border-radius: 10px;
+            margin-bottom: 15px;
         }
 
-        .card p { font-style: italic; color: #555; padding: 0 10px; }
+        .card p {
+            font-size: 0.9rem;
+            color: #555;
+            line-height: 1.4;
+        }
 
-        /* Mobile Adjustments */
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .grid { grid-template-columns: 1fr; }
-            .card img { height: 220px; }
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(2deg); }
+            50% { transform: translateY(-20px) rotate(-2deg); }
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .popped .balloon, .popped .string {
+            display: none;
+        }
+
+        .popped .card {
+            display: block;
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Pranjal 💕 Nayla</h1>
-        <div id="counter">0 / 8 balloons popped</div>
-        
-        <div class="controls">
-            <button class="btn-music" id="musicBtn" onclick="toggleMusic()">🎵</button>
+    <h1>Happy Valentine's Day! 🎈</h1>
+    <p>Pop a balloon to see a secret message...</p>
+
+    <div class="container" id="balloonGrid">
         </div>
-    </header>
-
-    <audio id="bgMusic" loop>
-        <source src="music.mp3" type="audio/mpeg">
-    </audio>
-
-    <div class="balloon-container" id="balloonBox"></div>
-    <div class="grid" id="cardGrid"></div>
 
     <script>
-        const total = 8;
-        let poppedCount = 0;
-        const music = document.getElementById('bgMusic');
-        const musicBtn = document.getElementById('musicBtn');
-
-        const items = [
-            { title: "Prettiest Girl", img: "pic1.jpg", msg: "The way you smile makes everything better." },
-            { title: "My Sunshine", img: "pic2.jpg", msg: "Thank you for being my light." },
-            { title: "Adventure Partner", img: "pic3.jpg", msg: "To the thousands of miles we've yet to travel." },
-            { title: "Sweetest Soul", img: "pic4.jpg", msg: "I'm the luckiest person to have you." },
-            { title: "My Better Half", img: "pic5.jpg", msg: "You complete the pieces I didn't know were missing." },
-            { title: "Funniest Moments", img: "pic6.jpg", msg: "Laughing with you is my favorite hobby." },
-            { title: "Pure Elegance", img: "pic7.jpg", msg: "You leave me breathless every time." },
-            { title: "Forever & Always", img: "pic8.jpg", msg: "Pranjal and Nayla, always together." }
+        const messages = [
+            { img: "https://picsum.photos/id/10/200", text: "From the very first moment we met, I knew there was something special about you. You bring a light into my life that I never knew was missing." },
+            { img: "https://picsum.photos/id/20/200", text: "Every day with you feels like a new adventure. Thank you for being my partner in crime and my best friend all rolled into one." },
+            { img: "https://picsum.photos/id/30/200", text: "I love the way you laugh and how you make even the most mundane chores feel like a celebration. You are truly one of a kind." },
+            { img: "https://picsum.photos/id/40/200", text: "Life isn't always easy, but having you by my side makes every challenge feel small. Thank you for always being my safe harbor." },
+            { img: "https://picsum.photos/id/50/200", text: "I find myself smiling at my phone just because I'm thinking of you. You have a permanent home in my heart and my thoughts." },
+            { img: "https://picsum.photos/id/60/200", text: "Your kindness and compassion inspire me to be a better person every single day. I am so incredibly lucky to call you mine." },
+            { img: "https://picsum.photos/id/70/200", text: "Distance or time can't change how I feel. You are the melody that my heart beats to, and I cherish every second we spend together." },
+            { img: "https://picsum.photos/id/80/200", text: "Here's to us, and to many more Valentine's Days filled with love, laughter, and endless joy. I love you more than words can say." }
         ];
 
-        const balloonBox = document.getElementById('balloonBox');
-        const cardGrid = document.getElementById('cardGrid');
+        const grid = document.getElementById('balloonGrid');
 
-        items.forEach((item, index) => {
-            const b = document.createElement('div');
-            b.className = 'balloon';
-            b.style.animationDelay = `${index * 0.2}s`;
-            b.onclick = () => popBalloon(index, b);
-            balloonBox.appendChild(b);
+        messages.forEach((m, index) => {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'balloon-wrapper';
+            wrapper.onclick = function() { this.classList.add('popped'); };
 
+            // Create balloon
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            balloon.style.backgroundColor = index % 2 === 0 ? '#ff4d6d' : '#ff758f';
+            balloon.style.animationDelay = `${index * 0.2}s`;
+
+            const string = document.createElement('div');
+            string.className = 'string';
+
+            // Create card
             const card = document.createElement('div');
             card.className = 'card';
-            card.id = `card-${index}`;
             card.innerHTML = `
-                <h3>${item.title}</h3>
-                <img src="${item.img}" alt="Memories">
-                <p>"${item.msg}"</p>
-                <div style="color:#d81b60">❤</div>
+                <img src="${m.img}" alt="Valentine Moment">
+                <p>${m.text}</p>
             `;
-            cardGrid.appendChild(card);
+
+            wrapper.appendChild(balloon);
+            wrapper.appendChild(string);
+            wrapper.appendChild(card);
+            grid.appendChild(wrapper);
         });
-
-        function popBalloon(index, element) {
-            if (element.classList.contains('popped')) return;
-            
-            element.classList.add('popped');
-            document.getElementById(`card-${index}`).style.display = 'block';
-            poppedCount++;
-            document.getElementById('counter').innerText = `${poppedCount} / ${total} balloons popped`;
-
-            // Start music on first pop
-            if (poppedCount === 1 && music.paused) {
-                music.play();
-                musicBtn.innerText = "⏸";
-            }
-        }
-
-        function toggleMusic() {
-            if (music.paused) {
-                music.play();
-                musicBtn.innerText = "⏸";
-            } else {
-                music.pause();
-                musicBtn.innerText = "🎵";
-            }
-        }
     </script>
 </body>
 </html>
